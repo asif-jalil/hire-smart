@@ -1,0 +1,10 @@
+{
+  "printWidth": 120,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "jsxSingleQuote": true,
+  "bracketSpacing": true,
+  "importOrderParserPlugins": ["typescript", "decorators-legacy"],
+  "plugins": ["prettier-plugin-organize-imports"]
+}
