@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
 import helmet from 'helmet';
 import 'reflect-metadata';
 import { AppModule } from './app.module';
@@ -19,6 +21,15 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
+  app.use(cookieParser(envService.secret.cookieSecret));
+  app.use(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    session({
+      secret: envService.secret.sessionSecret,
+      resave: false,
+      saveUninitialized: false,
+    }),
+  );
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 

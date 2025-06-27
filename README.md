@@ -71,6 +71,12 @@ email: admin@mail.com
 password: defaultPass123!
 ```
 
+And the swagger doc is available at (only development mode)
+
+```
+http://localhost:4000/api-doc
+```
+
 ### NPM Scripts Overview
 
 | Script                                           | Description                                  |
@@ -83,6 +89,5 @@ password: defaultPass123!
 | `npm run migration:generate --name=my-db-create` | Generates a new migration file.              |
 | `npm run migration:run`                          | Applies pending migrations.                  |
 | `npm run migration:revert`                       | Reverts the last migration.                  |
-| `npm run schema:drop`                            | Drops the current DB schema.                 |
 | `npm run seed:generate --name=my-db-seed`        | Generates a new seed file.                   |
 | `npm run seed:run`                               | Executes seed scripts.                       |

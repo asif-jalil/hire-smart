@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE, RouterModule } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -17,6 +17,7 @@ import { ValidateIncomingInput } from './pipes/validate-incoming-input.pipe';
 import routes from './routes';
 import { EnvService } from './shared/services/env.service';
 import { SharedModule } from './shared/shared.module';
+import { doubleCsrfProtection } from './utils/csrf';
 
 @Module({
   imports: [
@@ -80,4 +81,15 @@ import { SharedModule } from './shared/shared.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    if (process.env.IS_CSRF_ENABLED === 'true') {
+      consumer
+        .apply(doubleCsrfProtection)
+        .exclude({ path: '/api-doc', method: RequestMethod.GET }, { path: '/v1/auth/csrf', method: RequestMethod.GET })
+        .forRoutes('*');
+    } else {
+      console.log('⚠️ CSRF middleware skipped through feature flag');
+    }
+  }
+}

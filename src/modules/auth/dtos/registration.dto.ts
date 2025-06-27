@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, Matches, MaxLength, MinLength, ValidateIf } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, Matches, MaxLength, MinLength, ValidateIf } from 'class-validator';
 import { RolesEnum } from 'src/constants/role.enum';
 import { User } from 'src/modules/user/user.entity';
 import { Trim } from 'src/utils/transformers/trim.decorator';
@@ -15,6 +15,7 @@ export class RegisterDto {
   name?: string;
 
   @IsUnique(User, 'email', { message: 'User already exists' })
+  @IsEmail({}, { message: 'Invalid email format' })
   @IsNotEmpty({ message: 'Email is required' })
   @Trim()
   @ApiProperty()

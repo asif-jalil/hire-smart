@@ -97,6 +97,20 @@ export class EnvService {
     };
   }
 
+  get secret() {
+    return {
+      csrfSecret: this.getString('CSRF_SECRET'),
+      sessionSecret: this.getString('SESSION_SECRET'),
+      cookieSecret: this.getString('COOKIE_SECRET'),
+    };
+  }
+
+  get featureFlags() {
+    return {
+      isCsrfEnabled: this.getBoolean('IS_CSRF_ENABLED'),
+    };
+  }
+
   get redisConfig() {
     return {
       host: this.getString('REDIS_HOST'),

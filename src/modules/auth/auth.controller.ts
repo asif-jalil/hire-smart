@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -7,10 +7,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 import { AccessToken } from 'src/decorators/access-token.decorator';
 import { ResponseMessage } from 'src/decorators/response-message.decorator';
 import { Public } from 'src/decorators/skip-auth.decorator';
 import { UseUnauthGuard } from 'src/decorators/use-unauth.decorator';
+import { generateCsrfToken } from 'src/utils/csrf';
 import { ThrottlerIpGuard } from '../../guards/throttler-ip.guard';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
@@ -56,5 +58,15 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'You are not authenticated' })
   loadUser(@AccessToken() token: string) {
     return this.authService.authAccount(token);
+  }
+
+  @Get('csrf')
+  @Public()
+  @ResponseMessage('Generated CSRF token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'CSRF token generated successfully' })
+  getToken(@Req() req: Request, @Res() res: Response) {
+    const token = generateCsrfToken(req, res);
+    res.json({ csrfToken: token });
   }
 }
