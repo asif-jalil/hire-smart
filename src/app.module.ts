@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE, RouterModule } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppExceptionFilter } from './filters/app-exception.filter';
@@ -11,6 +12,7 @@ import { RequestInterceptor } from './interceptors/request.interceptor';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { UserModule } from './modules/user/user.module';
 import { StripRequestBodyPipe } from './pipes/strip-req-body.pipe';
 import { ValidateIncomingInput } from './pipes/validate-incoming-input.pipe';
@@ -39,10 +41,12 @@ import { doubleCsrfProtection } from './utils/csrf';
       useFactory: (envService: EnvService) => envService.dbConfig,
       inject: [EnvService],
     }),
+    ScheduleModule.forRoot(),
     SharedModule,
     AuthModule,
     UserModule,
     ProfileModule,
+    SchedulerModule,
   ],
   providers: [
     {
