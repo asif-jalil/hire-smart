@@ -26,6 +26,7 @@ export class AuthService {
       password,
       role,
       isVerified: true,
+      emailVerifiedAt: new Date(),
     });
 
     if (role === RolesEnum.CANDIDATE) {
@@ -76,7 +77,9 @@ export class AuthService {
       });
     }
 
-    user.updateLastLogin();
+    await this.userRepo.update(user.id, {
+      lastLoginAt: new Date(),
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...restUser } = user;
