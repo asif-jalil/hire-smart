@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNotEmptyObject,
   IsOptional,
   IsString,
   Matches,
@@ -46,25 +47,24 @@ export class RegisterDto {
   @ApiProperty()
   email: string;
 
-  @IsNotEmpty({ message: 'Password is required' })
   @Matches(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).+$/, {
     message: 'Password must contain at least one letter, one number, and one special character',
   })
   @MaxLength(64, { message: ValidationMessages.maxLength('Password', 64) })
   @MinLength(6, { message: ValidationMessages.minLength('Password', 6) })
+  @IsNotEmpty({ message: 'Password is required' })
   @Trim()
   @ApiProperty()
   password: string;
 
-  @IsEnum(NON_ADMIN_ROLES, { message: 'Invalid role' })
-  @ValidateIf((o: RegisterDto) => o.role !== RolesEnum.ADMIN)
+  @IsEnum(NON_ADMIN_ROLES, { message: `Role is limited to ${NON_ADMIN_ROLES.join(', ')}` })
   @IsNotEmpty({ message: 'Role is required' })
-  @IsOptional()
   @Trim()
   @ApiProperty({ enum: NON_ADMIN_ROLES, default: RolesEnum.CANDIDATE })
   role: RolesEnum;
 
   @ValidateIf((o: RegisterDto) => o.role === RolesEnum.CANDIDATE)
+  @IsNotEmptyObject({}, { message: 'Candidate preference is required' })
   @ValidateNested()
   @Type(() => CandidatePreferenceDto)
   @ApiPropertyOptional({

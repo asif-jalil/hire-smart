@@ -31,12 +31,6 @@ export class AuthService {
     if (role === RolesEnum.CANDIDATE) {
       const { candidatePreference } = dto;
 
-      if (!candidatePreference) {
-        throw new BadRequestException({
-          message: 'Candidate preference is required for candidate role',
-        });
-      }
-
       await this.candidatePreferenceRepo.create({
         candidateId: newUser.id,
         ...candidatePreference,

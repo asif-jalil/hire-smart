@@ -37,7 +37,6 @@ export class ValidateIncomingInput extends ValidationPipe {
       whitelist: false,
       exceptionFactory: exceptionFactory,
       transform: true,
-      skipUndefinedProperties: true,
     };
     super(options);
   }
