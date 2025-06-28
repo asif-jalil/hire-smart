@@ -2,9 +2,10 @@ import bcrypt from 'bcrypt';
 import { Exclude } from 'class-transformer';
 import { AbstractEntity } from 'src/common/abstract.entity';
 import { RolesEnum } from 'src/constants/role.enum';
-import { AfterLoad, BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { AfterLoad, BeforeInsert, BeforeUpdate, Column, Entity, Index } from 'typeorm';
 
 @Entity({ name: 'users' })
+@Index('IDX_ISVERIFIED_CREATEDAT', ['isVerified', 'createdAt'])
 export class User extends AbstractEntity {
   @Column({ type: 'varchar', length: 50, nullable: true })
   name: string;
@@ -13,7 +14,7 @@ export class User extends AbstractEntity {
   email: string;
 
   @Exclude({ toPlainOnly: false })
-  @Column({ type: 'varchar', length: 64, nullable: false, select: false })
+  @Column({ type: 'varchar', nullable: false, select: false })
   password: string;
 
   @Column({ type: 'varchar', length: 20, nullable: false })
@@ -21,6 +22,12 @@ export class User extends AbstractEntity {
 
   @Column({ type: 'boolean', default: false, nullable: false })
   isVerified: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  emailVerifiedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastLoginAt: Date;
 
   @Exclude()
   private tempPassword?: string;

@@ -30,6 +30,28 @@ export class CreateApplicationsTable1750875763182 implements MigrationInterface 
             isNullable: true,
           },
           {
+            name: 'resumeUrl',
+            type: 'varchar',
+            isNullable: false,
+          },
+          {
+            name: 'status',
+            type: 'varchar',
+            length: '20',
+            isNullable: false,
+          },
+          {
+            name: 'lastReviewedBy',
+            type: 'int',
+            isNullable: true,
+            unsigned: true,
+          },
+          {
+            name: 'lastReviewedAt',
+            type: 'timestamp',
+            isNullable: true,
+          },
+          {
             name: 'createdAt',
             type: 'timestamp',
             default: 'CURRENT_TIMESTAMP',
@@ -46,12 +68,21 @@ export class CreateApplicationsTable1750875763182 implements MigrationInterface 
             referencedTableName: 'jobs',
             referencedColumnNames: ['id'],
             onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
           },
           {
             columnNames: ['candidateId'],
             referencedTableName: 'users',
             referencedColumnNames: ['id'],
             onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
+          },
+          {
+            columnNames: ['lastReviewedBy'],
+            referencedTableName: 'users',
+            referencedColumnNames: ['id'],
+            onDelete: 'SET NULL',
+            onUpdate: 'CASCADE',
           },
         ],
         indices: [

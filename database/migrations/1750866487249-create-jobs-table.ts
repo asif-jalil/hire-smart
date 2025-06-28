@@ -46,9 +46,10 @@ export class CreateJobsTable1750866487249 implements MigrationInterface {
             isNullable: true,
           },
           {
-            name: 'isArchived',
-            type: 'boolean',
-            default: false,
+            name: 'status',
+            type: 'varchar',
+            length: '20',
+            isNullable: false,
           },
           {
             name: 'createdAt',
@@ -70,13 +71,27 @@ export class CreateJobsTable1750866487249 implements MigrationInterface {
             onUpdate: 'CASCADE',
           },
         ],
+        indices: [
+          {
+            name: 'IDX_JOBS_STATUS_CREATEDAT',
+            columnNames: ['status', 'createdAt'],
+          },
+          {
+            name: 'IDX_JOBS_MIN_MAX_SALARY',
+            columnNames: ['minSalary', 'maxSalary'],
+          },
+        ],
       }),
     );
 
     await queryRunner.query(`
       ALTER TABLE jobs
       ADD COLUMN fts tsvector GENERATED ALWAYS AS (
-        to_tsvector('english', coalesce(title, '') || ' ' || coalesce(description, ''))
+        to_tsvector('english', 
+          coalesce(title, '') || ' ' || 
+          coalesce(description, '') || ' ' || 
+          coalesce(location, '')
+        )
       ) STORED
     `);
 
@@ -86,7 +101,8 @@ export class CreateJobsTable1750866487249 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex('jobs', 'idx_fts_jobs');
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_fts_jobs`);
+    await queryRunner.query(`ALTER TABLE jobs DROP COLUMN IF EXISTS fts`);
     await queryRunner.dropTable('jobs');
   }
 }

@@ -45,6 +45,16 @@ export class CreateUsersTable1747336712476 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: 'emailVerifiedAt',
+            type: 'timestamp',
+            isNullable: true,
+          },
+          {
+            name: 'lastLoginAt',
+            type: 'timestamp',
+            isNullable: true,
+          },
+          {
             name: 'createdAt',
             type: 'timestamp',
             default: 'CURRENT_TIMESTAMP',
@@ -55,6 +65,12 @@ export class CreateUsersTable1747336712476 implements MigrationInterface {
             type: 'timestamp',
             default: 'CURRENT_TIMESTAMP',
             isNullable: false,
+          },
+        ],
+        indices: [
+          {
+            name: 'IDX_ISVERIFIED_CREATEDAT',
+            columnNames: ['isVerified', 'createdAt'],
           },
         ],
       }),
