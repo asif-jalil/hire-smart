@@ -1,5 +1,18 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, Matches, MaxLength, MinLength, ValidateIf } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import {
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 import { RolesEnum } from 'src/constants/role.enum';
 import { User } from 'src/modules/user/user.entity';
 import { Trim } from 'src/utils/transformers/trim.decorator';
@@ -7,6 +20,18 @@ import { IsUnique } from 'src/utils/validators/is-unique.validator';
 import { ValidationMessages } from 'src/utils/validators/validation-message';
 
 const NON_ADMIN_ROLES = Object.values(RolesEnum).filter((role) => role !== RolesEnum.ADMIN);
+
+export class CandidatePreferenceDto {
+  @IsString({ message: 'Preferred location must be string' })
+  @IsNotEmpty({ message: 'Preferred location is required' })
+  @ApiProperty()
+  preferredLocation: string;
+
+  @IsInt({ message: 'Expected salary must be number' })
+  @IsNotEmpty({ message: 'Expected salary is required' })
+  @ApiProperty()
+  expectedSalary: number;
+}
 
 export class RegisterDto {
   @IsOptional()
@@ -38,4 +63,13 @@ export class RegisterDto {
   @Trim()
   @ApiProperty({ enum: NON_ADMIN_ROLES, default: RolesEnum.CANDIDATE })
   role: RolesEnum;
+
+  @ValidateIf((o: RegisterDto) => o.role === RolesEnum.CANDIDATE)
+  @ValidateNested()
+  @Type(() => CandidatePreferenceDto)
+  @ApiPropertyOptional({
+    type: () => CandidatePreferenceDto,
+    description: 'Candidate preference details (only for role = candidate)',
+  })
+  candidatePreference?: CandidatePreferenceDto;
 }

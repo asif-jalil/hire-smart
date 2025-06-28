@@ -49,4 +49,8 @@ export class User extends AbstractEntity {
   async comparePassword(password: string) {
     return await bcrypt.compare(password, this.password);
   }
+
+  updateLastLogin() {
+    this.lastLoginAt = new Date();
+  }
 }

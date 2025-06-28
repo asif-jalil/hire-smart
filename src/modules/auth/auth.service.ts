@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { RolesEnum } from 'src/constants/role.enum';
 import BadRequestException from 'src/exceptions/bad-request.exception';
 import NotFoundException from 'src/exceptions/not-found.exception';
 import UnauthenticatedException from 'src/exceptions/unauthenticated.exception';
 import { TokenService } from 'src/shared/services/token.service';
+import { CandidatePreferenceRepository } from '../user/candidate-preference.repo';
 import { UserRepository } from '../user/user.repo';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/registration.dto';
@@ -11,7 +13,8 @@ import { RegisterDto } from './dtos/registration.dto';
 export class AuthService {
   constructor(
     private readonly token: TokenService,
-    private userRepo: UserRepository,
+    private readonly userRepo: UserRepository,
+    private readonly candidatePreferenceRepo: CandidatePreferenceRepository,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -24,6 +27,21 @@ export class AuthService {
       role,
       isVerified: true,
     });
+
+    if (role === RolesEnum.CANDIDATE) {
+      const { candidatePreference } = dto;
+
+      if (!candidatePreference) {
+        throw new BadRequestException({
+          message: 'Candidate preference is required for candidate role',
+        });
+      }
+
+      await this.candidatePreferenceRepo.create({
+        candidateId: newUser.id,
+        ...candidatePreference,
+      });
+    }
 
     const token = await this.token.signToken({
       id: newUser.id,
@@ -63,6 +81,8 @@ export class AuthService {
         password: 'Email and password does not match',
       });
     }
+
+    user.updateLastLogin();
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...restUser } = user;
@@ -117,6 +137,8 @@ export class AuthService {
         email: true,
         role: true,
         isVerified: true,
+        emailVerifiedAt: true,
+        lastLoginAt: true,
       },
       where: { id: userId },
     });
