@@ -15,7 +15,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
     message: 'Invalid request',
     code: 'InvalidCsrfToken',
   },
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+
   getSessionIdentifier: (req: Request) => req.session.id,
   getCsrfTokenFromRequest: (req: Request) => req.headers['x-csrf-token'],
 });

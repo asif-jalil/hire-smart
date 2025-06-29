@@ -23,7 +23,6 @@ async function bootstrap() {
   });
   app.use(cookieParser(envService.secret.cookieSecret));
   app.use(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     session({
       secret: envService.secret.sessionSecret,
       resave: false,
