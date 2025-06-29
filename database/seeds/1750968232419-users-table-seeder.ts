@@ -9,7 +9,7 @@ export class UsersTableSeeder1750968232419 implements Seeder {
   public async run(dataSource: DataSource): Promise<any> {
     const userRepo = dataSource.getRepository(User);
 
-    const user = userRepo.create([
+    const users = [
       {
         name: 'Admin',
         email: 'admin@mail.com',
@@ -31,8 +31,8 @@ export class UsersTableSeeder1750968232419 implements Seeder {
         role: RolesEnum.CANDIDATE,
         verifiedAt: new Date(),
       },
-    ]);
+    ];
 
-    await userRepo.createQueryBuilder().insert().into(User).values(user).orIgnore().execute();
+    await userRepo.createQueryBuilder().insert().into(User).values(users).orIgnore().execute();
   }
 }

@@ -1,6 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { AbstractEntity } from 'src/common/abstract.entity';
 import { JobStatus } from 'src/constants/status.enum';
+import { Application } from 'src/modules/job/entities/application.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { JobSkill } from './job-skill.entity';
@@ -41,4 +42,7 @@ export class Job extends AbstractEntity {
 
   @OneToMany(() => JobSkill, (jobSkill) => jobSkill.job, { cascade: true })
   jobSkills: JobSkill[];
+
+  @OneToMany(() => Application, (application) => application.job, { cascade: true })
+  applications: Application[];
 }

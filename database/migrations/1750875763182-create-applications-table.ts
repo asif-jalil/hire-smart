@@ -18,11 +18,13 @@ export class CreateApplicationsTable1750875763182 implements MigrationInterface 
             name: 'jobId',
             type: 'int',
             unsigned: true,
+            isNullable: false,
           },
           {
             name: 'candidateId',
             type: 'int',
             unsigned: true,
+            isNullable: false,
           },
           {
             name: 'coverLetter',

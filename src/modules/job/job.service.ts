@@ -7,6 +7,7 @@ import { DataSource, In, SelectQueryBuilder } from 'typeorm';
 import { SkillRepository } from '../skill/skill.repo';
 import { User } from '../user/entities/user.entity';
 import { CreateJobDto } from './dtos/create-job.dto';
+import { PostedBy } from './dtos/get-job.dto';
 import { UpdateJobDto } from './dtos/update-job.dto';
 import { Job } from './entities/job.entity';
 import { JobSkillRepository } from './job-skill.repo';
@@ -159,7 +160,7 @@ export class JobService {
     }
   }
 
-  getJobs(pagination: PaginateQuery): Promise<Paginated<Job>> {
+  getJobs(pagination: PaginateQuery, authUser: User, postedBy: PostedBy): Promise<Paginated<Job>> {
     const queryBuilder: SelectQueryBuilder<Job> = this.jobRepo
       .createQueryBuilder('job')
       .leftJoin('job.poster', 'poster')
@@ -186,6 +187,12 @@ export class JobService {
 
     if (pagination.search) {
       queryBuilder.andWhere('job.fts @@ plainto_tsquery(:search)', { search: pagination.search });
+    }
+
+    if (postedBy === PostedBy.ME) {
+      queryBuilder.andWhere('job.postedBy = :userId', { userId: authUser.id });
+    } else if (postedBy === PostedBy.OTHERS) {
+      queryBuilder.andWhere('job.postedBy != :userId', { userId: authUser.id });
     }
 
     return paginate(pagination, queryBuilder, {
