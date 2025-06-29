@@ -39,13 +39,7 @@ export class CreateUsersTable1747336712476 implements MigrationInterface {
             isNullable: false,
           },
           {
-            name: 'isVerified',
-            type: 'boolean',
-            default: false,
-            isNullable: false,
-          },
-          {
-            name: 'emailVerifiedAt',
+            name: 'verifiedAt',
             type: 'timestamp',
             isNullable: true,
           },
@@ -69,8 +63,8 @@ export class CreateUsersTable1747336712476 implements MigrationInterface {
         ],
         indices: [
           {
-            name: 'IDX_ISVERIFIED_CREATEDAT',
-            columnNames: ['isVerified', 'createdAt'],
+            name: 'IDX_VERIFIEDAT_CREATEDAT_ROLE',
+            columnNames: ['verifiedAt', 'createdAt', 'role'],
           },
         ],
       }),

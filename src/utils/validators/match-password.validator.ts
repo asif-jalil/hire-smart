@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { Request } from 'express';
 import { REQUEST_CONTEXT } from 'src/interceptors/request.interceptor';
-import { User } from 'src/modules/user/user.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import { DataSource } from 'typeorm';
 
 @ValidatorConstraint({ async: true })

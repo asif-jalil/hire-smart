@@ -11,8 +11,10 @@ import { RolesGuard } from './guards/roles.guard';
 import { RequestInterceptor } from './interceptors/request.interceptor';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
+import { JobModule } from './modules/job/job.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
+import { SkillModule } from './modules/skill/skill.module';
 import { UserModule } from './modules/user/user.module';
 import { StripRequestBodyPipe } from './pipes/strip-req-body.pipe';
 import { ValidateIncomingInput } from './pipes/validate-incoming-input.pipe';
@@ -47,6 +49,8 @@ import { doubleCsrfProtection } from './utils/csrf';
     UserModule,
     ProfileModule,
     SchedulerModule,
+    JobModule,
+    SkillModule,
   ],
   providers: [
     {

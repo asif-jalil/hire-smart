@@ -5,7 +5,7 @@ import { RolesEnum } from 'src/constants/role.enum';
 import { AfterLoad, BeforeInsert, BeforeUpdate, Column, Entity, Index } from 'typeorm';
 
 @Entity({ name: 'users' })
-@Index('IDX_ISVERIFIED_CREATEDAT', ['isVerified', 'createdAt'])
+@Index('IDX_VERIFIEDAT_CREATEDAT_ROLE', ['verifiedAt', 'createdAt', 'role'])
 export class User extends AbstractEntity {
   @Column({ type: 'varchar', length: 50, nullable: true })
   name: string;
@@ -20,11 +20,8 @@ export class User extends AbstractEntity {
   @Column({ type: 'varchar', length: 20, nullable: false })
   role: RolesEnum;
 
-  @Column({ type: 'boolean', default: false, nullable: false })
-  isVerified: boolean;
-
   @Column({ type: 'timestamp', nullable: true })
-  emailVerifiedAt: Date;
+  verifiedAt: Date;
 
   @Column({ type: 'timestamp', nullable: true })
   lastLoginAt: Date;

@@ -1,6 +1,8 @@
 import { Routes } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
+import { JobModule } from './modules/job/job.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { SkillModule } from './modules/skill/skill.module';
 
 const routes: Routes = [
   {
@@ -10,6 +12,14 @@ const routes: Routes = [
   {
     path: 'profile',
     module: ProfileModule,
+  },
+  {
+    path: 'skills',
+    module: SkillModule,
+  },
+  {
+    path: 'jobs',
+    module: JobModule,
   },
 ];
 

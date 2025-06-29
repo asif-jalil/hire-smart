@@ -1,41 +1,93 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RolesEnum } from 'src/constants/role.enum';
 import BadRequestException from 'src/exceptions/bad-request.exception';
 import NotFoundException from 'src/exceptions/not-found.exception';
 import UnauthenticatedException from 'src/exceptions/unauthenticated.exception';
 import { TokenService } from 'src/shared/services/token.service';
+import { DataSource, In } from 'typeorm';
+import { SkillRepository } from '../skill/skill.repo';
 import { CandidatePreferenceRepository } from '../user/candidate-preference.repo';
+import { User } from '../user/entities/user.entity';
+import { PreferredSkillRepository } from '../user/preferred-skill.repo';
 import { UserRepository } from '../user/user.repo';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/registration.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly token: TokenService,
     private readonly userRepo: UserRepository,
     private readonly candidatePreferenceRepo: CandidatePreferenceRepository,
+    private readonly preferredSkillRepo: PreferredSkillRepository,
+    private readonly skillRepo: SkillRepository,
+    private dataSource: DataSource,
   ) {}
 
   async register(dto: RegisterDto) {
-    const { email, password, name, role } = dto;
-
-    const newUser = await this.userRepo.create({
-      name,
-      email,
-      password,
-      role,
-      isVerified: true,
-      emailVerifiedAt: new Date(),
-    });
+    const { email, password, name, role, candidatePreference } = dto;
 
     if (role === RolesEnum.CANDIDATE) {
-      const { candidatePreference } = dto;
+      const foundSkills = await this.skillRepo.findMany({ where: { id: In(candidatePreference.skillIds) } });
 
-      await this.candidatePreferenceRepo.create({
-        candidateId: newUser.id,
-        ...candidatePreference,
+      if (foundSkills.length !== candidatePreference.skillIds.length) {
+        throw new BadRequestException({
+          skillIds: 'Some skills are not found',
+        });
+      }
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    const manager = queryRunner.manager;
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    let newUser: User;
+
+    try {
+      newUser = await this.userRepo.create(
+        {
+          name,
+          email,
+          password,
+          role,
+          verifiedAt: new Date(),
+          lastLoginAt: new Date(),
+        },
+        manager,
+      );
+
+      if (role === RolesEnum.CANDIDATE) {
+        const { skillIds, ...preferencePayload } = candidatePreference;
+
+        const preference = await this.candidatePreferenceRepo.create(
+          {
+            candidateId: newUser.id,
+            ...preferencePayload,
+          },
+          manager,
+        );
+        const preferredSkills = skillIds.map((skillId) => ({
+          candidatePreferenceId: preference.id,
+          skillId,
+        }));
+
+        await this.preferredSkillRepo.createMany(preferredSkills, manager);
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error('Error at registration', error);
+
+      throw new BadRequestException({
+        message: 'Error at registration',
       });
+    } finally {
+      await queryRunner.release();
     }
 
     const token = await this.token.signToken({
@@ -133,8 +185,7 @@ export class AuthService {
         name: true,
         email: true,
         role: true,
-        isVerified: true,
-        emailVerifiedAt: true,
+        verifiedAt: true,
         lastLoginAt: true,
       },
       where: { id: userId },

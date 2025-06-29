@@ -57,7 +57,7 @@ export class AuthGuard implements CanActivate {
         name: true,
         email: true,
         role: true,
-        isVerified: true,
+        verifiedAt: true,
       },
       where: { id: payload.decoded.id },
     });
@@ -68,7 +68,7 @@ export class AuthGuard implements CanActivate {
       });
     }
 
-    if (!user.isVerified) {
+    if (!user.verifiedAt) {
       throw new UnauthenticatedException({
         message: 'Your account is not verified',
       });

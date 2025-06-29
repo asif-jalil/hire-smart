@@ -33,7 +33,7 @@ export class CreateJobsTable1750866487249 implements MigrationInterface {
           {
             name: 'location',
             type: 'varchar',
-            isNullable: true,
+            isNullable: false,
           },
           {
             name: 'minSalary',

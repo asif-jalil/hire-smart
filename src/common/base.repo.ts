@@ -2,6 +2,7 @@ import NotFoundException from 'src/exceptions/not-found.exception';
 import {
   DeepPartial,
   DeleteResult,
+  EntityManager,
   FindManyOptions,
   FindOneOptions,
   FindOptionsWhere,
@@ -33,65 +34,74 @@ export type MethodsOnly<T> = {
 export abstract class BaseRepository<T extends ObjectLiteral> {
   constructor(protected readonly repo: Repository<T>) {}
 
-  async create(data: DeepPartial<T>): Promise<T> {
-    const entity = this.repo.create(data);
-    return await this.repo.save(entity);
+  async create(data: DeepPartial<T>, manager?: EntityManager): Promise<T> {
+    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const entity = repository.create(data);
+    return await repository.save(entity);
   }
 
-  async findMany<Options extends FindManyOptions<T>>(findManyArgs: Options): Promise<Array<SelectFields<T, Options>>> {
-    return this.repo.find(findManyArgs) as Promise<Array<SelectFields<T, Options>>>;
+  async createMany(data: DeepPartial<T>[], manager?: EntityManager): Promise<T[]> {
+    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const entities = repository.create(data);
+    return await repository.save(entities);
   }
 
-  async findOne<Options extends FindOneOptions<T>>(findOneArgs: Options): Promise<SelectFields<T, Options> | null> {
-    return this.repo.findOne(findOneArgs) as Promise<SelectFields<T, Options> | null>;
+  async findMany<Options extends FindManyOptions<T>>(
+    findManyArgs: Options,
+    manager?: EntityManager,
+  ): Promise<Array<SelectFields<T, Options>>> {
+    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    return repository.find(findManyArgs) as Promise<Array<SelectFields<T, Options>>>;
+  }
+
+  async findOne<Options extends FindOneOptions<T>>(
+    findOneArgs: Options,
+    manager?: EntityManager,
+  ): Promise<SelectFields<T, Options> | null> {
+    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    return repository.findOne(findOneArgs) as Promise<SelectFields<T, Options> | null>;
   }
 
   async findOneOrThrow<Options extends FindOneOptions<T>>(
     findOneArgs: Options,
     notFoundMessage = 'Resource not found',
+    manager?: EntityManager,
   ): Promise<SelectFields<T, Options>> {
-    const result = await this.findOne(findOneArgs);
+    const result = await this.findOne(findOneArgs, manager);
     if (!result) throw new NotFoundException({ message: notFoundMessage });
     return result;
   }
 
   async update<
     Options extends string | string[] | number | number[] | Date | Date[] | ObjectId | ObjectId[] | FindOptionsWhere<T>,
-  >(criteria: Options, data: QueryDeepPartialEntity<T>): Promise<UpdateResult> {
-    return this.repo.update(criteria, data);
+  >(criteria: Options, data: QueryDeepPartialEntity<T>, manager?: EntityManager): Promise<UpdateResult> {
+    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    return repository.update(criteria, data);
   }
 
-  async save(entity: T, options?: SaveOptions): Promise<T> {
-    return this.repo.save(entity, options);
+  async save(entity: T, options?: SaveOptions, manager?: EntityManager): Promise<T> {
+    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    return repository.save(entity, options);
   }
 
   async findOneAndUpdate<Options extends FindOneOptions<T>>(
     findOneArgs: Options,
     data: QueryDeepPartialEntity<T>,
     notFoundMessage?: string,
+    manager?: EntityManager,
   ) {
-    await this.findOneOrThrow(findOneArgs, notFoundMessage);
+    await this.findOneOrThrow(findOneArgs, notFoundMessage, manager);
     const where = findOneArgs.where as FindOptionsWhere<T>;
-    const updateResult = await this.update(where, data);
-    const updatedData = await this.findOne(findOneArgs);
+    const updateResult = await this.update(where, data, manager);
+    const updatedData = await this.findOne(findOneArgs, manager);
     return { data: updatedData, updateResult };
   }
 
   async delete<Options extends FindOptionsWhere<T> | string | number | ObjectId>(
     criteria: Options,
+    manager?: EntityManager,
   ): Promise<DeleteResult> {
-    return this.repo.delete(criteria);
-  }
-
-  async query(query: string, parameters?: any[]): Promise<any> {
-    return this.repo.query(query, parameters);
-  }
-
-  async count<Options extends FindOneOptions<T>>(findOneArgs: Options = {} as Options): Promise<number> {
-    const item = await this.findOne({ ...findOneArgs, select: { id: true }, order: { id: 'ASC' }, take: 1 });
-
-    // @ts-expect-error can not found id in item
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return item ? item.id : 0;
+    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    return repository.delete(criteria);
   }
 }

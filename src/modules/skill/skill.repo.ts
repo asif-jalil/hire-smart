@@ -3,11 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { BaseRepository } from 'src/common/base.repo';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { Skill } from './entities/skill.entity';
 
 @Injectable()
-export class UserRepository extends BaseRepository<User> {
-  constructor(@InjectRepository(User) repo: Repository<User>) {
+export class SkillRepository extends BaseRepository<Skill> {
+  constructor(@InjectRepository(Skill) repo: Repository<Skill>) {
     super(repo);
   }
 }

@@ -1,5 +1,6 @@
 import { AbstractEntity } from 'src/common/abstract.entity';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { PreferredSkill } from './preferred-skills.entity';
 import { User } from './user.entity';
 
 @Entity({ name: 'candidatePreference' })
@@ -16,4 +17,7 @@ export class CandidatePreference extends AbstractEntity {
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'candidateId' })
   candidate: User;
+
+  @OneToMany(() => PreferredSkill, (ps) => ps.candidatePreference, { cascade: true })
+  preferredSkills: PreferredSkill[];
 }

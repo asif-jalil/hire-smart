@@ -1,0 +1,153 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { JobStatus } from 'src/constants/status.enum';
+import BadRequestException from 'src/exceptions/bad-request.exception';
+import NotFoundException from 'src/exceptions/not-found.exception';
+import { DataSource, In } from 'typeorm';
+import { SkillRepository } from '../skill/skill.repo';
+import { User } from '../user/entities/user.entity';
+import { CreateJobDto } from './dtos/create-job.dto';
+import { UpdateJobDto } from './dtos/update-job.dto';
+import { JobSkillRepository } from './job-skill.repo';
+import { JobRepository } from './job.repo';
+
+@Injectable()
+export class JobService {
+  private readonly logger = new Logger(JobService.name);
+
+  constructor(
+    private readonly jobRepo: JobRepository,
+    private readonly skillRepo: SkillRepository,
+    private readonly jobSkillRepo: JobSkillRepository,
+    private dataSource: DataSource,
+  ) {}
+
+  async createJob(authUser: User, dto: CreateJobDto) {
+    const { skillIds, ...jobPayload } = dto;
+
+    const foundSkills = await this.skillRepo.findMany({
+      where: { id: In(skillIds) },
+    });
+
+    if (foundSkills.length !== skillIds.length) {
+      throw new BadRequestException({
+        skillIds: 'Some skills are not found',
+      });
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    const manager = queryRunner.manager;
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const job = await this.jobRepo.create(
+        {
+          ...jobPayload,
+          postedBy: authUser.id,
+          status: JobStatus.OPEN,
+        },
+        manager,
+      );
+
+      const jobSkills = skillIds.map((skillId) => ({
+        jobId: job.id,
+        skillId,
+      }));
+
+      await this.jobSkillRepo.createMany(jobSkills, manager);
+
+      await queryRunner.commitTransaction();
+
+      return job;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error('Error at job creating', error);
+
+      throw new BadRequestException({
+        message: 'Error at job creating',
+      });
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async updateJob(id: number, dto: UpdateJobDto, authUser: User) {
+    const job = await this.jobRepo.findOne({ where: { id, postedBy: authUser.id } });
+
+    if (!job) {
+      throw new NotFoundException({
+        message: 'Job not found',
+      });
+    }
+
+    if (job.status === JobStatus.ARCHIVED) {
+      throw new BadRequestException({
+        message: 'You cannot update an archived job',
+      });
+    }
+
+    const { skillIds, ...updatePayload } = dto;
+
+    if (skillIds) {
+      const foundSkills = await this.skillRepo.findMany({
+        where: { id: In(skillIds) },
+      });
+
+      if (foundSkills.length !== skillIds.length) {
+        throw new BadRequestException({
+          message: 'Some provided skills are invalid',
+        });
+      }
+
+      await this.jobSkillRepo.delete({ jobId: job.id });
+
+      const newJobSkills = skillIds.map((skillId) => ({
+        jobId: job.id,
+        skillId,
+      }));
+      await this.jobSkillRepo.createMany(newJobSkills);
+    }
+
+    await this.jobRepo.update(job.id, updatePayload);
+    await job.reload();
+
+    return job;
+  }
+
+  async remove(id: number, authUser: User) {
+    const job = await this.jobRepo.findOne({ where: { id, postedBy: authUser.id } });
+
+    if (!job) {
+      throw new NotFoundException({
+        message: 'Job not found',
+      });
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    const manager = queryRunner.manager;
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await this.jobSkillRepo.delete({ jobId: job.id }, manager);
+      await this.jobRepo.delete(job.id, manager);
+
+      await queryRunner.commitTransaction();
+
+      return {
+        id: job.id,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error('Error at job removal', error);
+
+      throw new BadRequestException({
+        message: 'Error at job removal',
+      });
+    } finally {
+      await queryRunner.release();
+    }
+  }
+}

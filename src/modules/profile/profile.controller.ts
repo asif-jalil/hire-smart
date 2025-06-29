@@ -3,14 +3,12 @@ import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nes
 import { AuthUser } from 'src/decorators/auth-user.decorator';
 import { ResponseMessage } from 'src/decorators/response-message.decorator';
 import { IdentityConfirmationGuard } from 'src/guards/identity-confirmation.guard';
-import { User } from '../user/user.entity';
+import { User } from '../user/entities/user.entity';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
 import { ProfileService } from './profile.service';
 
 @ApiTags('profile')
-@Controller({
-  version: '1',
-})
+@Controller({ version: '1' })
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 

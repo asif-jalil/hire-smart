@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ONE_DAY } from 'src/constants/duration';
-import { User } from 'src/modules/user/user.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import { EnvService } from 'src/shared/services/env.service';
 import { EncryptionService } from './encryption.service';
 

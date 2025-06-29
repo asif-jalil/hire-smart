@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import moment from 'moment';
 import { RolesEnum } from 'src/constants/role.enum';
-import { LessThan, Not } from 'typeorm';
+import { IsNull, LessThan, Not } from 'typeorm';
 import { UserRepository } from '../user/user.repo';
 
 @Injectable()
@@ -16,12 +16,12 @@ export class SchedulerService {
     name: 'cleanup-unverified-users',
   })
   async handleCleanup(): Promise<void> {
-    this.logger.log('Running cleanup: deleting unverified users');
+    this.logger.warn('Running cleanup: deleting unverified users');
 
     const cutoff = moment().subtract(7, 'days').toDate();
 
     const result = await this.userRepo.delete({
-      isVerified: false,
+      verifiedAt: IsNull(),
       createdAt: LessThan(cutoff),
       role: Not(RolesEnum.ADMIN),
     });

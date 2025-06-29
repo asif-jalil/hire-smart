@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsEmail,
   IsEnum,
   IsInt,
@@ -15,7 +17,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { RolesEnum } from 'src/constants/role.enum';
-import { User } from 'src/modules/user/user.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import { Trim } from 'src/utils/transformers/trim.decorator';
 import { IsUnique } from 'src/utils/validators/is-unique.validator';
 import { ValidationMessages } from 'src/utils/validators/validation-message';
@@ -32,6 +34,12 @@ export class CandidatePreferenceDto {
   @IsNotEmpty({ message: 'Expected salary is required' })
   @ApiProperty()
   expectedSalary: number;
+
+  @IsArray({ message: 'Skill IDs must be an array' })
+  @IsInt({ each: true, message: 'Skill IDs must be numbers' })
+  @ArrayNotEmpty({ message: 'At least one skill is required' })
+  @ApiProperty({ type: [Number], description: 'List of skill IDs' })
+  skillIds: number[];
 }
 
 export class RegisterDto {
@@ -71,5 +79,5 @@ export class RegisterDto {
     type: () => CandidatePreferenceDto,
     description: 'Candidate preference details (only for role = candidate)',
   })
-  candidatePreference?: CandidatePreferenceDto;
+  candidatePreference: CandidatePreferenceDto;
 }

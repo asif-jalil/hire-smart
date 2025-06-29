@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { BaseRepository } from 'src/common/base.repo';
 import { Repository } from 'typeorm';
-import { CandidatePreference } from './candidate-preference.entity';
+import { CandidatePreference } from './entities/candidate-preference.entity';
 
 @Injectable()
 export class CandidatePreferenceRepository extends BaseRepository<CandidatePreference> {
