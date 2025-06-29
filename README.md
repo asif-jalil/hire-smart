@@ -47,10 +47,10 @@ npm run setup:db
 
 This will:
 
-- Run all pending database migrations (npm run migration:run)
-- Execute seed scripts (npm run seed:run)
+- Run all pending database migrations
+- Execute seed scripts
 
-## Step 4 — Start the Development Server
+### Step 4 — Start the Development Server
 
 Start the app in development mode:
 
@@ -64,10 +64,26 @@ Once running, the server will be available at:
 http://localhost:4000
 ```
 
-Default admin credential is
+Default credentials are:
+
+For admin
 
 ```
 email: admin@mail.com
+password: defaultPass123!
+```
+
+For employer
+
+```
+email: employee@mail.com
+password: defaultPass123!
+```
+
+For candidate
+
+```
+email: candidate@mail.com
 password: defaultPass123!
 ```
 
