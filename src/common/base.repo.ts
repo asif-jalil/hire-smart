@@ -32,16 +32,16 @@ export type MethodsOnly<T> = {
 }[keyof T];
 
 export abstract class BaseRepository<T extends ObjectLiteral> {
-  constructor(protected readonly repo: Repository<T>) {}
+  constructor(protected readonly repository: Repository<T>) {}
 
   async create(data: DeepPartial<T>, manager?: EntityManager): Promise<T> {
-    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
     const entity = repository.create(data);
     return await repository.save(entity);
   }
 
   async createMany(data: DeepPartial<T>[], manager?: EntityManager): Promise<T[]> {
-    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
     const entities = repository.create(data);
     return await repository.save(entities);
   }
@@ -50,7 +50,7 @@ export abstract class BaseRepository<T extends ObjectLiteral> {
     findManyArgs: Options,
     manager?: EntityManager,
   ): Promise<Array<SelectFields<T, Options>>> {
-    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
     return repository.find(findManyArgs) as Promise<Array<SelectFields<T, Options>>>;
   }
 
@@ -58,7 +58,7 @@ export abstract class BaseRepository<T extends ObjectLiteral> {
     findOneArgs: Options,
     manager?: EntityManager,
   ): Promise<SelectFields<T, Options> | null> {
-    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
     return repository.findOne(findOneArgs) as Promise<SelectFields<T, Options> | null>;
   }
 
@@ -75,12 +75,12 @@ export abstract class BaseRepository<T extends ObjectLiteral> {
   async update<
     Options extends string | string[] | number | number[] | Date | Date[] | ObjectId | ObjectId[] | FindOptionsWhere<T>,
   >(criteria: Options, data: QueryDeepPartialEntity<T>, manager?: EntityManager): Promise<UpdateResult> {
-    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
     return repository.update(criteria, data);
   }
 
   async save(entity: T, options?: SaveOptions, manager?: EntityManager): Promise<T> {
-    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
     return repository.save(entity, options);
   }
 
@@ -101,7 +101,17 @@ export abstract class BaseRepository<T extends ObjectLiteral> {
     criteria: Options,
     manager?: EntityManager,
   ): Promise<DeleteResult> {
-    const repository = manager?.getRepository(this.repo.target) ?? this.repo;
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
     return repository.delete(criteria);
+  }
+
+  async query<Result = any>(query: string, parameters: any[] = [], manager?: EntityManager): Promise<Result[]> {
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
+    return repository.query(query, parameters);
+  }
+
+  createQueryBuilder(alias: string, manager?: EntityManager) {
+    const repository = manager?.getRepository(this.repository.target) ?? this.repository;
+    return repository.createQueryBuilder(alias);
   }
 }

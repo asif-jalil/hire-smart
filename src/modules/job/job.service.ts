@@ -1,12 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { JobStatus } from 'src/constants/status.enum';
 import BadRequestException from 'src/exceptions/bad-request.exception';
 import NotFoundException from 'src/exceptions/not-found.exception';
-import { DataSource, In } from 'typeorm';
+import { DataSource, In, SelectQueryBuilder } from 'typeorm';
 import { SkillRepository } from '../skill/skill.repo';
 import { User } from '../user/entities/user.entity';
 import { CreateJobDto } from './dtos/create-job.dto';
 import { UpdateJobDto } from './dtos/update-job.dto';
+import { Job } from './entities/job.entity';
 import { JobSkillRepository } from './job-skill.repo';
 import { JobRepository } from './job.repo';
 
@@ -73,11 +75,17 @@ export class JobService {
   }
 
   async updateJob(id: number, dto: UpdateJobDto, authUser: User) {
-    const job = await this.jobRepo.findOne({ where: { id, postedBy: authUser.id } });
+    const job = await this.jobRepo.findOne({ where: { id } });
 
     if (!job) {
       throw new NotFoundException({
         message: 'Job not found',
+      });
+    }
+
+    if (job.postedBy !== authUser.id) {
+      throw new BadRequestException({
+        message: 'You are not authorized to update this job',
       });
     }
 
@@ -149,5 +157,84 @@ export class JobService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  getJobs(pagination: PaginateQuery): Promise<Paginated<Job>> {
+    const queryBuilder: SelectQueryBuilder<Job> = this.jobRepo
+      .createQueryBuilder('job')
+      .leftJoin('job.poster', 'poster')
+      .leftJoin('job.jobSkills', 'jobSkills')
+      .leftJoin('jobSkills.skill', 'skill')
+      .select([
+        'job.id',
+        'job.title',
+        'job.description',
+        'job.location',
+        'job.status',
+        'job.minSalary',
+        'job.maxSalary',
+        'job.createdAt',
+        'poster.id',
+        'poster.name',
+        'poster.email',
+        'poster.role',
+        'poster.verifiedAt',
+        'jobSkills.id',
+        'skill.id',
+        'skill.name',
+      ]);
+
+    if (pagination.search) {
+      queryBuilder.andWhere('job.fts @@ plainto_tsquery(:search)', { search: pagination.search });
+    }
+
+    return paginate(pagination, queryBuilder, {
+      sortableColumns: ['id'],
+      defaultSortBy: [['id', 'DESC']],
+      defaultLimit: 10,
+      maxLimit: 100,
+      relativePath: false,
+      ignoreSearchByInQueryParam: true,
+      ignoreSelectInQueryParam: false,
+    });
+  }
+
+  getJob(id: number) {
+    return this.jobRepo.findOneOrThrow(
+      {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          location: true,
+          status: true,
+          minSalary: true,
+          maxSalary: true,
+          createdAt: true,
+          poster: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            verifiedAt: true,
+          },
+          jobSkills: {
+            id: true,
+            skill: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        where: { id },
+        relations: {
+          poster: true,
+          jobSkills: {
+            skill: true,
+          },
+        },
+      },
+      'Job not found',
+    );
   }
 }

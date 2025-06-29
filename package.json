@@ -52,6 +52,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
     "ms-typescript": "^2.0.0",
+    "nestjs-paginate": "^12.5.0",
     "pg": "^8.16.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

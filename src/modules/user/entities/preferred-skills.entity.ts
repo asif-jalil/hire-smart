@@ -1,5 +1,3 @@
-// src/modules/skills/entities/preferred-skill.entity.ts
-
 import { AbstractEntity } from 'src/common/abstract.entity';
 import { Skill } from 'src/modules/skill/entities/skill.entity';
 import { CandidatePreference } from 'src/modules/user/entities/candidate-preference.entity';

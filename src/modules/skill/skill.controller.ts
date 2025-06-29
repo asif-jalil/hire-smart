@@ -7,7 +7,7 @@ import { CreateBulkSkillsDto } from './dto/create-bulk-skill.dto';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { SkillService } from './skill.service';
 
-@ApiTags('skills')
+@ApiTags('skill')
 @ApiBearerAuth()
 @Roles(RolesEnum.EMPLOYER, RolesEnum.CANDIDATE)
 @Controller({ version: '1' })
