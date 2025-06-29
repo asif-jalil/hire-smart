@@ -14,6 +14,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JobModule } from './modules/job/job.module';
 import { MetricModule } from './modules/metric/metric.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { QueueModule } from './modules/queue/queue.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { SkillModule } from './modules/skill/skill.module';
 import { UserModule } from './modules/user/user.module';
@@ -45,6 +46,7 @@ import { doubleCsrfProtection } from './utils/csrf';
       inject: [EnvService],
     }),
     ScheduleModule.forRoot(),
+    QueueModule.register(),
     SharedModule,
     AuthModule,
     UserModule,
@@ -53,6 +55,7 @@ import { doubleCsrfProtection } from './utils/csrf';
     JobModule,
     SkillModule,
     MetricModule,
+    QueueModule,
   ],
   providers: [
     {

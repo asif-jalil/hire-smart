@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bullmq';
+import { BackgroundJobsConsumer } from 'src/constants/queue.enum';
 import { RolesEnum } from 'src/constants/role.enum';
+import { InjectBackgroundQueue } from 'src/decorators/inject-queue.decorator';
 import BadRequestException from 'src/exceptions/bad-request.exception';
 import NotFoundException from 'src/exceptions/not-found.exception';
 import UnauthenticatedException from 'src/exceptions/unauthenticated.exception';
@@ -24,6 +27,7 @@ export class AuthService {
     private readonly preferredSkillRepo: PreferredSkillRepository,
     private readonly skillRepo: SkillRepository,
     private dataSource: DataSource,
+    @InjectBackgroundQueue() private readonly bgQueue: Queue,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -138,6 +142,10 @@ export class AuthService {
 
     const token = await this.token.signToken(restUser);
     const authUser = await this.getAuthUser(user.id);
+
+    if (authUser.role === RolesEnum.CANDIDATE) {
+      await this.bgQueue.add(BackgroundJobsConsumer.JOB_RECOMMENDATION, { candidateId: authUser.id });
+    }
 
     return {
       user: authUser,
