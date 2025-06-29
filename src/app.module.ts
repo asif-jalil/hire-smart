@@ -12,6 +12,7 @@ import { RequestInterceptor } from './interceptors/request.interceptor';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { JobModule } from './modules/job/job.module';
+import { MetricModule } from './modules/metric/metric.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { SkillModule } from './modules/skill/skill.module';
@@ -51,6 +52,7 @@ import { doubleCsrfProtection } from './utils/csrf';
     SchedulerModule,
     JobModule,
     SkillModule,
+    MetricModule,
   ],
   providers: [
     {
