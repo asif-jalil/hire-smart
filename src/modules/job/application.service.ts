@@ -57,6 +57,7 @@ export class ApplicationService {
     });
 
     await this.cacheManager.del(buildCacheKey().METRIC);
+    await this.cacheManager.del(buildCacheKey(job.id, application.id).JOB_APPLICATIONS);
 
     return application;
   }

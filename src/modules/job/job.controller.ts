@@ -126,6 +126,8 @@ export class JobController {
 
   @Get(':id/applications')
   @Roles(RolesEnum.EMPLOYER)
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(toMs('10m'))
   @ResponseMessage('Applications retrieved successfully')
   @HttpCode(HttpStatus.OK)
   @PaginatedSwaggerDocs(Application, JobPaginationConfig)
