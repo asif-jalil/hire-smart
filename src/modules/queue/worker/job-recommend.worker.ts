@@ -4,7 +4,7 @@ import NotFoundException from 'src/exceptions/not-found.exception';
 import { ApplicationRepository } from 'src/modules/job/application.repo';
 import { JobRepository } from 'src/modules/job/job.repo';
 import { CandidatePreferenceRepository } from 'src/modules/user/candidate-preference.repo';
-import { ILike, In, LessThanOrEqual, Not } from 'typeorm';
+import { Between, ILike, In, IsNull, LessThanOrEqual, Not, Or } from 'typeorm';
 import { JobRecommendationProps } from '../types/background-jobs.types';
 
 @Injectable()
@@ -69,6 +69,7 @@ export class JobRecommendWorker {
         status: Not(JobStatus.ARCHIVED),
         location: ILike(preferredLocation),
         minSalary: LessThanOrEqual(expectedSalary),
+        maxSalary: Or(IsNull(), Between(expectedSalary, expectedSalary + 40000)),
         id: appliedJobIds.length ? Not(In(appliedJobIds)) : undefined,
         jobSkills: {
           skillId: In(skillIds),
