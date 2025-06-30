@@ -1,6 +1,5 @@
 import { Global, Module, Provider } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RedisModule } from 'src/redis/redis.module';
 import { TokenService } from 'src/shared/services/token.service';
 import { IsUniqueConstraint } from 'src/utils/validators/is-unique.validator';
 import { MatchPasswordConstraint } from 'src/utils/validators/match-password.validator';
@@ -20,7 +19,7 @@ const providers: Provider[] = [
 
 @Global()
 @Module({
-  imports: [RedisModule],
+  imports: [],
   providers,
   exports: [...providers],
 })

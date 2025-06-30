@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { ApplicationStatus, JobStatus } from 'src/constants/status.enum';
 import BadRequestException from 'src/exceptions/bad-request.exception';
 import ForbiddenException from 'src/exceptions/forbidden.exception';
 import NotFoundException from 'src/exceptions/not-found.exception';
+import { buildCacheKey } from 'src/utils/cahce-keys';
 import { User } from '../user/entities/user.entity';
 import { ApplicationRepository } from './application.repo';
 import { ApplyJobDto } from './dtos/apply-job.dto';
@@ -14,6 +17,7 @@ export class ApplicationService {
   constructor(
     private readonly jobRepo: JobRepository,
     private readonly applicationRepo: ApplicationRepository,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async applyJob(id: number, authUser: User, dto: ApplyJobDto) {
@@ -51,6 +55,8 @@ export class ApplicationService {
       candidateId: authUser.id,
       status: ApplicationStatus.PENDING,
     });
+
+    await this.cacheManager.del(buildCacheKey().METRIC);
 
     return application;
   }

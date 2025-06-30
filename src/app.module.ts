@@ -1,3 +1,5 @@
+import { createKeyv } from '@keyv/redis';
+import { CacheModule } from '@nestjs/cache-manager';
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE, RouterModule } from '@nestjs/core';
@@ -43,6 +45,15 @@ import { doubleCsrfProtection } from './utils/csrf';
     }),
     TypeOrmModule.forRootAsync({
       useFactory: (envService: EnvService) => envService.dbConfig,
+      inject: [EnvService],
+    }),
+    CacheModule.registerAsync({
+      useFactory: (envService: EnvService) => {
+        return {
+          stores: [createKeyv(envService.redisConfig.url)],
+        };
+      },
+      isGlobal: true,
       inject: [EnvService],
     }),
     ScheduleModule.forRoot(),

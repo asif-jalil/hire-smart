@@ -1,5 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import { Cache } from 'cache-manager';
 import { BackgroundJobsConsumer } from 'src/constants/queue.enum';
 import { RolesEnum } from 'src/constants/role.enum';
 import { InjectBackgroundQueue } from 'src/decorators/inject-queue.decorator';
@@ -7,6 +9,7 @@ import BadRequestException from 'src/exceptions/bad-request.exception';
 import NotFoundException from 'src/exceptions/not-found.exception';
 import UnauthenticatedException from 'src/exceptions/unauthenticated.exception';
 import { TokenService } from 'src/shared/services/token.service';
+import { buildCacheKey } from 'src/utils/cahce-keys';
 import { DataSource, In } from 'typeorm';
 import { SkillRepository } from '../skill/skill.repo';
 import { CandidatePreferenceRepository } from '../user/candidate-preference.repo';
@@ -28,6 +31,7 @@ export class AuthService {
     private readonly skillRepo: SkillRepository,
     private dataSource: DataSource,
     @InjectBackgroundQueue() private readonly bgQueue: Queue,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -81,6 +85,8 @@ export class AuthService {
 
         await this.preferredSkillRepo.createMany(preferredSkills, manager);
       }
+
+      await this.cacheManager.del(buildCacheKey().METRIC);
 
       await queryRunner.commitTransaction();
     } catch (error) {

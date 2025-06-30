@@ -113,9 +113,7 @@ export class EnvService {
 
   get redisConfig() {
     return {
-      host: this.getString('REDIS_HOST'),
-      port: this.getNumber('REDIS_PORT'),
-      password: this.getString('REDIS_PASSWORD'),
+      url: `redis://${this.getString('REDIS_USER')}:${this.getString('REDIS_PASSWORD')}@${this.getString('REDIS_HOST')}:${this.getNumber('REDIS_PORT')}`,
     };
   }
 }

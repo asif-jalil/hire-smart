@@ -1,3 +1,4 @@
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -11,8 +12,10 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { toMs } from 'ms-typescript';
 import { Paginate, PaginatedSwaggerDocs, PaginateQuery } from 'nestjs-paginate';
 import { RolesEnum } from 'src/constants/role.enum';
 import { AuthUser } from 'src/decorators/auth-user.decorator';
@@ -48,6 +51,8 @@ export class JobController {
 
   @Get()
   @Roles(RolesEnum.EMPLOYER, RolesEnum.CANDIDATE)
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(toMs('5m'))
   @ResponseMessage('Job list retrieved successfully')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Job retrieved' })
@@ -70,6 +75,8 @@ export class JobController {
 
   @Get(':id')
   @Roles(RolesEnum.EMPLOYER, RolesEnum.CANDIDATE)
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(toMs('1h'))
   @ResponseMessage('Job retrieved successfully')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Job found', type: Job })
@@ -132,6 +139,8 @@ export class JobController {
 
   @Get(':id/applications/:applicationId')
   @Roles(RolesEnum.EMPLOYER, RolesEnum.CANDIDATE)
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(toMs('10m'))
   @ResponseMessage('Application retrieved successfully')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: 'Application retrieved successfully' })

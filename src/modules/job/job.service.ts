@@ -1,8 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { JobStatus } from 'src/constants/status.enum';
 import BadRequestException from 'src/exceptions/bad-request.exception';
 import NotFoundException from 'src/exceptions/not-found.exception';
+import { buildCacheKey } from 'src/utils/cahce-keys';
 import { DataSource, In, SelectQueryBuilder } from 'typeorm';
 import { SkillRepository } from '../skill/skill.repo';
 import { User } from '../user/entities/user.entity';
@@ -22,6 +25,7 @@ export class JobService {
     private readonly skillRepo: SkillRepository,
     private readonly jobSkillRepo: JobSkillRepository,
     private dataSource: DataSource,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async createJob(authUser: User, dto: CreateJobDto) {
@@ -59,6 +63,8 @@ export class JobService {
       }));
 
       await this.jobSkillRepo.createMany(jobSkills, manager);
+
+      await this.cacheManager.del(buildCacheKey().METRIC);
 
       await queryRunner.commitTransaction();
 
@@ -120,6 +126,8 @@ export class JobService {
 
     await this.jobRepo.update(job.id, updatePayload);
     await job.reload();
+
+    await this.cacheManager.del(buildCacheKey(job.id).JOB_WITH_ID);
 
     return job;
   }

@@ -31,9 +31,7 @@ export class QueueModule {
           imports: [ConfigModule],
           useFactory: (env: EnvService) => ({
             connection: {
-              host: env.redisConfig.host,
-              port: env.redisConfig.port,
-              password: env.redisConfig.password,
+              url: env.redisConfig.url,
             },
             defaultJobOptions: { attempts: 2, backoff: 2 },
           }),
