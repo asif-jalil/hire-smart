@@ -53,6 +53,6 @@ export class SchedulerService {
       },
     );
 
-    this.logger.log(`Archived ${result.affected} old job posts.`);
+    this.logger.log(`Archived ${result.affected} old job posts`);
   }
 }

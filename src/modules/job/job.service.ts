@@ -1,8 +1,11 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bullmq';
 import { Cache } from 'cache-manager';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { BackgroundJobsConsumer } from 'src/constants/queue.enum';
 import { JobStatus } from 'src/constants/status.enum';
+import { InjectBackgroundQueue } from 'src/decorators/inject-queue.decorator';
 import BadRequestException from 'src/exceptions/bad-request.exception';
 import NotFoundException from 'src/exceptions/not-found.exception';
 import { buildCacheKey } from 'src/utils/cahce-keys';
@@ -25,6 +28,7 @@ export class JobService {
     private readonly skillRepo: SkillRepository,
     private readonly jobSkillRepo: JobSkillRepository,
     private dataSource: DataSource,
+    @InjectBackgroundQueue() private readonly bgQueue: Queue,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -67,6 +71,8 @@ export class JobService {
       await this.cacheManager.del(buildCacheKey().METRIC);
 
       await queryRunner.commitTransaction();
+
+      await this.bgQueue.add(BackgroundJobsConsumer.JOB_MATCHING, { jobId: job.id });
 
       return job;
     } catch (error) {

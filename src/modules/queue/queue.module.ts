@@ -6,11 +6,13 @@ import { EnvService } from 'src/shared/services/env.service';
 import { JobModule } from '../job/job.module';
 import { UserModule } from '../user/user.module';
 import { BackgroundJobsProcessor } from './processors/background-jobs.processor';
-import { JobRecommendWorker } from './worker/job-recommend.worker';
+import { NotificationProcessor } from './processors/notification.processor';
+import { JobMatching } from './worker/job-matching.worker';
+import { JobNotificationWorker } from './worker/job-notification.worker';
 
 @Module({
   imports: [JobModule, UserModule],
-  providers: [BackgroundJobsProcessor, JobRecommendWorker],
+  providers: [BackgroundJobsProcessor, NotificationProcessor, JobMatching, JobNotificationWorker],
 })
 export class QueueModule {
   static register(): DynamicModule {

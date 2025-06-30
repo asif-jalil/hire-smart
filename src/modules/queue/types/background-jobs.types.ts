@@ -1,3 +1,3 @@
-export type JobRecommendationProps = {
-  candidateId: number;
+export type JobMatchingProps = {
+  jobId: number;
 };
