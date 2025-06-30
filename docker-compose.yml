@@ -13,7 +13,7 @@ services:
       - redis
     volumes:
       - .:/app
-    command: npm run start:prod
+    command: npm run start:dev
 
   db:
     image: postgres:16
