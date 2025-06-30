@@ -11,6 +11,8 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - hiresmart-net
 
   db:
     image: postgres:16
@@ -23,6 +25,8 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - hiresmart-net
 
   redis:
     image: redis:7-alpine
@@ -32,6 +36,8 @@ services:
     command: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
+    networks:
+      - hiresmart-net
 
   adminer:
     image: adminer
@@ -40,7 +46,13 @@ services:
       - '8080:8080'
     depends_on:
       - db
+    networks:
+      - hiresmart-net
 
 volumes:
   pgdata:
   redisdata:
+
+networks:
+  hiresmart-net:
+    driver: bridge
