@@ -1,13 +1,6 @@
-<div align="center">
-  <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="NestJS Logo" />
-  <h1>HireSmart</h1>
-  <p>A robust job board platform built with NestJS, PostgreSQL, and TypeORM.</p>
-  <p>
-    <a href="https://github.com/asif/hire-smart/actions"><img src="https://github.com/asif/hire-smart/workflows/CI/badge.svg" alt="CI Status" /></a>
-    <a href="https://github.com/asif/hire-smart/blob/main/LICENSE"><img src="https://img.shields.io/github/license/asif/hire-smart" alt="License" /></a>
-    <a href="https://github.com/prettier/prettier"><img src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square" alt="Code Style: Prettier" /></a>
-  </p>
-</div>
+# HireSmart
+
+---
 
 ## 🚀 Project Setup Guide
 
