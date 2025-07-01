@@ -3,12 +3,10 @@ export enum Queues {
   NOTIFICATION = 'notification',
 }
 
-export enum BackgroundJobsConsumer {
-  JOB_MATCHING = 'JOB_MATCHING',
-  JOB_RECOMMENDATION = 'JOB_RECOMMENDATION',
+export enum BackgroundJob {
+  JOB_MATCH = 'JOB_MATCH',
 }
 
-export enum NotificationConsumer {
-  JOB_MATCHING_ALERT = 'JOB_MATCHING_ALERT',
-  JOB_RECOMMENDATION_ALERT = 'JOB_RECOMMENDATION_ALERT',
+export enum Notification {
+  JOB_MATCH = 'JOB_MATCH',
 }

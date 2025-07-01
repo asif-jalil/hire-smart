@@ -3,7 +3,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { Cache } from 'cache-manager';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { BackgroundJobsConsumer } from 'src/constants/queue.enum';
+import { BackgroundJob } from 'src/constants/queue.enum';
 import { JobStatus } from 'src/constants/status.enum';
 import { InjectBackgroundQueue } from 'src/decorators/inject-queue.decorator';
 import BadRequestException from 'src/exceptions/bad-request.exception';
@@ -72,7 +72,7 @@ export class JobService {
 
       await queryRunner.commitTransaction();
 
-      await this.bgQueue.add(BackgroundJobsConsumer.JOB_MATCHING, { jobId: job.id });
+      await this.bgQueue.add(BackgroundJob.JOB_MATCH, { jobId: job.id });
 
       return job;
     } catch (error) {

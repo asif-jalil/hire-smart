@@ -7,12 +7,15 @@ import { JobModule } from '../job/job.module';
 import { UserModule } from '../user/user.module';
 import { BackgroundJobsProcessor } from './processors/background-jobs.processor';
 import { NotificationProcessor } from './processors/notification.processor';
+import { JobMatchingAlert } from './worker/job-matching-alert.worker';
 import { JobMatching } from './worker/job-matching.worker';
-import { JobNotificationWorker } from './worker/job-notification.worker';
+
+const processors = [BackgroundJobsProcessor, NotificationProcessor];
+const workers = [JobMatching, JobMatchingAlert];
 
 @Module({
   imports: [JobModule, UserModule],
-  providers: [BackgroundJobsProcessor, NotificationProcessor, JobMatching, JobNotificationWorker],
+  providers: [...processors, ...workers],
 })
 export class QueueModule {
   static register(): DynamicModule {

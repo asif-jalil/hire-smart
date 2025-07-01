@@ -1,36 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { NotificationConsumer } from 'src/constants/queue.enum';
+import { Notification } from 'src/constants/queue.enum';
 import { InjectNotificationQueue } from 'src/decorators/inject-queue.decorator';
 import { JobRepository } from 'src/modules/job/job.repo';
 import { CandidatePreferenceRepository } from 'src/modules/user/candidate-preference.repo';
 import { Between, ILike } from 'typeorm';
 import { JobMatchingProps } from '../types/background-jobs.types';
+import { JobWorker } from '../types/worker.types';
 
 @Injectable()
-export class JobMatching {
+export class JobMatching implements JobWorker<JobMatchingProps> {
   constructor(
     private readonly jobRepo: JobRepository,
     private readonly candidatePreferenceRepo: CandidatePreferenceRepository,
     @InjectNotificationQueue() private readonly notificationQueue: Queue,
   ) {}
 
-  async process(data: JobMatchingProps) {
+  async handle(data: JobMatchingProps) {
     const { jobId } = data;
 
-    const job = await this.jobRepo.findOneOrThrow({
-      where: { id: jobId },
-      select: {
-        id: true,
-        location: true,
-        minSalary: true,
-        maxSalary: true,
-        jobSkills: { id: true, skill: { id: true, name: true } },
+    const job = await this.jobRepo.findOneOrThrow(
+      {
+        where: { id: jobId },
+        select: {
+          id: true,
+          location: true,
+          minSalary: true,
+          maxSalary: true,
+          jobSkills: { id: true, skill: { id: true, name: true } },
+        },
+        relations: {
+          jobSkills: { skill: true },
+        },
       },
-      relations: {
-        jobSkills: { skill: true },
-      },
-    });
+      'No job found',
+    );
 
     const jobSkillIds = job.jobSkills.map((js) => js.skill.id);
     const jobLocation = job.location;
@@ -73,7 +77,7 @@ export class JobMatching {
       .map((pref) => pref.candidate);
 
     for (const preference of matchedPreferences) {
-      await this.notificationQueue.add(NotificationConsumer.JOB_MATCHING_ALERT, preference);
+      await this.notificationQueue.add(Notification.JOB_MATCH, preference);
     }
   }
 }
