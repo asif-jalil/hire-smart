@@ -23,11 +23,52 @@ export class ProfileService {
   }
 
   async getProfile(id: number) {
-    return this.userRepo.findOneOrThrow(
+    const user = await this.userRepo.findOneOrThrow(
       {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          verifiedAt: true,
+          lastLoginAt: true,
+          candidatePreference: {
+            id: true,
+            expectedSalary: true,
+            preferredLocation: true,
+            preferredSkills: {
+              id: true,
+              skill: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
         where: { id },
+        relations: {
+          candidatePreference: {
+            preferredSkills: {
+              skill: true,
+            },
+          },
+        },
       },
       'User not found',
     );
+
+    const { preferredSkills, ...restPreference } = user.candidatePreference || {};
+
+    return {
+      ...user,
+      candidatePreference: {
+        ...restPreference,
+        skills:
+          preferredSkills?.map((ps) => ({
+            id: ps.skill.id,
+            name: ps.skill.name,
+          })) || [],
+      },
+    };
   }
 }

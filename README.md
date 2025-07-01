@@ -116,3 +116,45 @@ docker-compose up -d
 # Stop the services
 docker-compose down
 ```
+
+---
+
+## 🚀 Application Workflow
+
+### User Registration and Authentication
+
+- **New User Registration:** Users (Admin, Employer, Candidate) can register for an account.
+- **Login:** Registered users can log in using their credentials.
+- **Authentication:** JWT (JSON Web Tokens) are used for secure authentication.
+
+### Job Management (Employer)
+
+- **Create Job:** Employers can create new job postings, specifying details like title, description, required skills, and salary.
+- **View Jobs:** Employers can view all their posted jobs.
+- **Update Job:** Employers can modify details of their existing job postings.
+- **Delete Job:** Employers can remove job postings.
+
+### Profile and Preferences
+
+- **Update password:** Anyone can update their password.
+- **View profile:** Anyone can view their profile.
+
+### Job Application (Candidate)
+
+- **Browse Jobs:** Candidates can browse available job postings.
+- **Apply for Job:** Candidates can apply for jobs that match their skills and preferences.
+- **View Applications:** Candidates can view the status of their job applications.
+
+### Job Matching and Notifications
+
+- **Job Matching:** The system periodically matches new job postings with suitable candidates based on their skills and preferences.
+- **Notifications:** Candidates receive notifications for new job matches and updates on their applications.
+
+### Admin Functionality
+
+- **Metric Monitoring:** Admins can view application metrics and system performance.
+
+### Background Processes
+
+- **Queue System:** Redis-backed queues handle background tasks such as job matching and sending notifications, ensuring the main application remains responsive.
+- **Scheduled Tasks:** Scheduled tasks manage periodic operations like data synchronization or report generation.
