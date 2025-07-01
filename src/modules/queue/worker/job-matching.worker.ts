@@ -72,6 +72,8 @@ export class JobMatching {
       })
       .map((pref) => pref.candidate);
 
-    await this.notificationQueue.add(NotificationConsumer.JOB_MATCHING_ALERT, matchedPreferences);
+    for (const preference of matchedPreferences) {
+      await this.notificationQueue.add(NotificationConsumer.JOB_MATCHING_ALERT, preference);
+    }
   }
 }
